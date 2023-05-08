@@ -42,7 +42,7 @@ update_outdated_series <- function(){
   series_releases = read.csv("data/Fred/config/series_releases.csv")
   
   series_releases_update_table = series_releases %>%
-    inner_join(releases_dates, by = c("releases_id" = "release_id")) %>%
+    left_join(releases_dates, by = c("releases_id" = "release_id")) %>%
     filter(last_updated >= last_downloaded)
   
   for (key_str in series_releases_update_table$key){
@@ -104,3 +104,10 @@ fred_series_requested <- function(series_id_requested, freq, agg){
 # 
 # write.csv(series_releases, "data/Fred/config/series_releases.csv", row.names = FALSE)
 
+
+
+
+
+# series_releases_tab = read.csv("data/Fred/config/series_releases.csv")
+
+         

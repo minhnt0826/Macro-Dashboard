@@ -67,21 +67,21 @@ tightening_plot
 # tightening_plot_2
 # 
 # library(ggplot2)
-# 
-# nfp_payrolls = fred_request_data("PAYEMS") %>%
-#   mutate(chng = value - lag(value , 1)) %>%
-#   right_join(employment_data.z, by = "date") %>%
-#   select(date, chng, mean.z) %>%
-#   filter(chng > -1000 & chng < 1000)
-# 
+
+nfp_payrolls = fred_request_data("PAYEMS") %>%
+  mutate(chng = value - lag(value , 1)) %>%
+  right_join(employment_data.z, by = "date") %>%
+  select(date, chng, mean.z) %>%
+  filter(chng > -1000 & chng < 1000)
+
 # plot1 <- plot_ly(nfp_payrolls, x = ~date, y = ~mean.z, type = 'scatter') %>%
 #   add_trace(x = ~date, y = ~chng, name = "nfp", mode = 'lines')
 # plot1
-# 
-# ggplot(nfp_payrolls, aes(x=chng, y=mean.z)) + 
-#   geom_point()+
-#   geom_smooth(method=lm) 
-# 
+
+ggplot(nfp_payrolls, aes(x=chng, y=mean.z)) +
+  geom_point()+
+  geom_smooth(method=lm)
+
 # 
 # chng_y2 <- list(
 #   tickfont = list(color = "red"),
@@ -124,7 +124,7 @@ tightening_plot
 #   select(date, sales_furniture_chng)
 # 
 
-real_residential_spending = read_excel("/Users/nguyenthanhminh/Documents/Stocks/Macro Dashboard/data/Archived/construction_spending_02.xls") %>%
+real_residential_spending = read_excel("data/Archived/construction_spending_02.xls") %>%
   select(date, value = `RESIDENTIAL BUILDINGS`) %>%
   mutate(value = value * 0.9575) %>%
   filter(date < "2002-01-01") %>%
@@ -163,7 +163,7 @@ housing_under_construction_lm = fred_request_data("CES2023610001") %>%
 #   select(date, construction_emp, housing_5, housing_1) %>%
 #   filter(date >= "1971-01-01")
 # 
-write.csv(housing_under_construction_lm, file = "/Users/nguyenthanhminh/Documents/Stocks/Python Projects/ML macro data/housing_data.csv", row.names = F)
+# write.csv(housing_under_construction_lm, file = "/Users/nguyenthanhminh/Documents/Stocks/Python Projects/ML macro data/housing_data.csv", row.names = F)
 #   left_join(retail_sales_furniture, by = "date") %>%
 #   mutate(lead_construction_emp_chng = lead(construction_emp_chng, 12))
 # 
@@ -260,3 +260,50 @@ plot1 = create_plotly_plot_with_growth_data(personal_witholding)
 plot1
 
 
+
+
+
+
+data = read.csv("/Users/nguyenthanhminh/Downloads/ESMS_SeasonallyAdjusted_Diffusion.csv") %>%
+  mutate(date = as.Date(surveyDate)) %>%
+  mutate(chng = NOCDISA - lag(NOCDISA, 1))
+
+plot_ly(data, x=~date, y=~chng, mode = "lines")
+
+
+
+
+uk_m4 = read.csv("/Users/nguyenthanhminh/Downloads/BOE_m4.csv")
+colnames(uk_m4) = c("date","m4","m4_lending")
+
+uk_m4 = uk_m4 %>%
+  mutate(date = as.Date(date, format = "%d %b %y")) %>%
+  mutate(date = format(date, "%Y-%m-01")) %>%
+  mutate(date = as.Date(date)) %>%
+  left_join(fred_request_data("GBRCPICORMINMEI"), by = "date") %>%
+  arrange(date)
+  
+uk_m4$value[165] = 122 
+
+
+uk_m4 = uk_m4 %>%
+  mutate(real_m4 = m4 / value,
+  real_m4_lending = m4_lending / value)
+
+plot = plot_ly(uk_m4, x = ~date, y = ~real_m4, type = "scatter", mode = "lines") %>%
+  layout(title = "real m4",
+         yaxis = list(type = "log"))
+
+plot
+
+m4_plot = uk_m4 %>%
+  create_growth_data_for_df(., .$real_m4) %>%
+  create_plotly_plot_with_growth_data(.)
+
+m4_plot
+
+
+plot1.1 = plot_ly(uk_m4, x = ~date, y = ~real_m4_lending, type = "scatter", mode = "lines") %>%
+  layout(title = "real m4 lending")
+
+plot1.1

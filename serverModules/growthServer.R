@@ -27,8 +27,14 @@ industrial_production = real_industrial_production %>%
   select(date, value)
 
 
-real_nonfarm_payrolls = fred_request_data("PAYEMS")
-real_employment_level = fred_request_data("CE16OV")
+aggregate_weekly_hours = fred_request_data("AWHI") %>%
+  mutate(chng_prod = value / lag(value, 1)) %>%
+  full_join(fred_request_data("AWHAE"), by = "date") %>%
+  mutate(chng_private= value.y / lag(value.y, 1)) %>%
+  mutate(chng_private = coalesce(chng_private, chng_prod)) %>%
+  filter(!is.na(chng_private)) %>%
+  mutate(value = 100 * cumprod(chng_private)) %>%
+  select(date, value)
 
 aggregate_payrolls = fred_request_data("CES0500000035") %>%
   mutate(chng_prod = value / lag(value, 1)) %>%
@@ -43,22 +49,27 @@ aggregate_payrolls = fred_request_data("CES0500000035") %>%
 n_month_growth_ann <- function(x, n, na.rm = TRUE) ((x / lag(x, n)) ^ (12/n) - 1)*100
 
 # Growth indices ####
-real_growth_index = real_nonfarm_payrolls %>%
-  left_join(real_employment_level, by = "date") %>%
+real_growth_index = aggregate_weekly_hours %>%
+  left_join(aggregate_weekly_hours, by = "date") %>%
   left_join(real_personal_income, by = "date") %>%
   left_join(real_industrial_production, by = "date") %>%
   left_join(real_retail_sales, by = "date") %>%
   left_join(real_personal_consumption, by = "date") %>%
   select(contains('date') | contains('value')) %>%
   mutate(across(contains('value'), 
-                   .fns = list(growth_3m = ~n_month_growth_ann(., 3),
+                   .fns = list(growth_1m = ~n_month_growth_ann(., 1),
+                               growth_3m = ~n_month_growth_ann(., 3),
                                growth_6m = ~n_month_growth_ann(., 6),
                                growth_12m = ~n_month_growth_ann(., 12)))) %>%
-  mutate(growth_3m = rowMeans(across(contains("growth_3m")), na.rm = T),
+  mutate(growth_1m = rowMeans(across(contains("growth_1m")), na.rm = T),
+         growth_3m = rowMeans(across(contains("growth_3m")), na.rm = T),
          growth_6m = rowMeans(across(contains("growth_6m")), na.rm = T),
          growth_12m = rowMeans(across(contains("growth_12m")), na.rm = T)) %>%
-  select(date, growth_3m, growth_6m, growth_12m)
+  select(date, growth_1m, growth_3m, growth_6m, growth_12m)
   
+real_growth_index_plot1 <- plot_ly(real_growth_index, x = ~date, y = ~growth_1m, type = 'scatter', mode = 'lines') %>%
+  add_trace(y = ~rollmean(growth_1m, k = 3, fill = NA, align = "right"), name = "MA3") %>%
+  layout(title = 'Real growth index 1m annualized')
 
 real_growth_index_plot1.1 <- plot_ly(real_growth_index, x = ~date, y = ~growth_3m, type = 'scatter', mode = 'lines') %>%
   add_trace(y = ~rollmean(growth_3m, k = 3, fill = NA, align = "right"), name = "MA3") %>%
@@ -139,12 +150,12 @@ nominal_personal_income_plot = personal_income %>%
 
 real_personal_consumption_plot = real_personal_consumption %>%
   create_growth_data_for_df(., .$value) %>%
-  create_plotly_plot_with_growth_data(.) %>%
+  create_plotly_plot_with_growth_data(., growth_1m = T) %>%
   layout(title = "Real personal consumption")
 
 real_retail_sales_plot = real_retail_sales %>%
   create_growth_data_for_df(., .$value) %>%
-  create_plotly_plot_with_growth_data(.) %>%
+  create_plotly_plot_with_growth_data(., growth_1m = T) %>%
   layout(title = "Real retail sales")
 
 real_personal_income_plot = real_personal_income %>%
@@ -152,15 +163,15 @@ real_personal_income_plot = real_personal_income %>%
   create_plotly_plot_with_growth_data(.) %>%
   layout(title = "Real personal income")
 
-real_nonfarm_payrolls_plot = real_nonfarm_payrolls %>%
+real_nonfarm_payrolls_plot = aggregate_weekly_hours %>%
   create_growth_data_for_df(., .$value) %>%
   create_plotly_plot_with_growth_data(.) %>%
-  layout(title = "Real nonfarm payrolls")
-
-real_employment_level_plot = real_employment_level %>%
-  create_growth_data_for_df(., .$value) %>%
-  create_plotly_plot_with_growth_data(.) %>%
-  layout(title = "Real employment level")
+  layout(title = "Aggregate weekly hours")
+# 
+# real_employment_level_plot = real_employment_level %>%
+#   create_growth_data_for_df(., .$value) %>%
+#   create_plotly_plot_with_growth_data(.) %>%
+#   layout(title = "Real employment level")
 
 real_industrial_production_plot = real_industrial_production %>%
   create_growth_data_for_df(., .$value) %>%
@@ -214,6 +225,10 @@ growthServer <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
+      output$real_growth_index_plot1 <- renderPlotly({
+        real_growth_index_plot1
+      })
+      
       output$real_growth_index_plot1.1 <- renderPlotly({
         real_growth_index_plot1.1
       })

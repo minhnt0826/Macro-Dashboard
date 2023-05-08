@@ -15,6 +15,13 @@ employmentUI <- function(id)
              ),
              fluidRow(
                tabBox(
+                 id = "aggregate_weekly_hours",
+                 tabPanel("Tab1", plotlyOutput(ns("aggregate_weekly_hours_plot"))),
+                 tabPanel("Tab2", plotlyOutput(ns("aggregate_weekly_hours_production_plot")))
+               )
+             ),
+             fluidRow(
+               tabBox(
                  id = "nfp_tab2",
                  tabPanel("Tab1", plotlyOutput(ns("avg_hourly_earnings_plot"))),
                  tabPanel("Tab2", plotlyOutput(ns("avg_hourly_earnings_production_plot")))
@@ -143,7 +150,8 @@ employmentUI <- function(id)
                tabBox(
                  id = "claims_tab1",
                  tabPanel("Tab1", plotlyOutput(ns("claims_plot1.1"))),
-                 tabPanel("Tab2", plotlyOutput(ns("claims_plot1.2")))
+                 tabPanel("Tab2", plotlyOutput(ns("claims_plot1.2"))),
+                 tabPanel("Tab2", plotlyOutput(ns("claims_plot1.3")))
                )
              ),
              fluidRow(
@@ -169,6 +177,20 @@ employmentUI <- function(id)
              ),
              fluidRow(
                box(plotlyOutput(ns("initial_claims_breath_plot"), height = 400), width = 12)
+             )
+    ),
+    tabPanel(title = "Unemployment indicators",
+             fluidRow(
+               box(plotlyOutput(ns("permanent_unrate_ma3_ma12_plot"), height = 400), width = 12)
+             ),
+             fluidRow(
+               box(plotlyOutput(ns("unemployment_rate_u2_ma3_ma12_plot"), height = 400), width = 12)
+             ),
+             fluidRow(
+               box(plotlyOutput(ns("unemployment_rate_ma3_ma12_plot"), height = 400), width = 12)
+             ),
+             fluidRow(
+               box(plotlyOutput(ns("insured_unemployment_rate_yoy_plot"), height = 400), width = 12)
              )
     )
   )

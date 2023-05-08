@@ -5,6 +5,11 @@ card_spending = read.csv("data/bea_card_spending.csv") %>%
   select(week_start_date, industry, median) %>%
   mutate(week_start_date = as.Date(week_start_date, format = "%m/%d/%Y"))
 
+total_card_spending = card_spending %>%
+  filter(industry == 'Total retail and food service, excluding nonstore') %>%
+  mutate(median = 100 + median) %>%
+  mutate(yoy = (median / lag(median, 52) - 1) *100)
+
 card_spending = reshape(card_spending, idvar = "week_start_date", timevar = "industry", direction = "wide")
 
 cyclical_card_spending = card_spending[-c(8,14,18,19,20)] %>%
@@ -25,7 +30,15 @@ plot2 <- plot_ly(card_spending, x = ~week_start_date, y = ~`median.Total retail 
   add_trace(y = ~SMA(`median.Total retail and food service`, 4)) %>%
   layout(title = 'Total Card spending')
 
-plot1.1
-plot1.2
+plot3 = plot_ly(total_card_spending, x = ~week_start_date, y = ~yoy, type = 'scatter', mode = 'lines') %>%
+  add_trace(y = ~SMA(yoy, 4)) %>%
+  layout(title = 'Total Card spending yoy')
+
+# plot1.1
+# plot1.2
 
 plot2
+plot3
+
+
+

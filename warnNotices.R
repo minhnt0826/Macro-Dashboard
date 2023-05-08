@@ -15,12 +15,13 @@ cali_warn_org = read_excel("data/WARN/cali_warn_report.xlsx", skip =  0) %>%
 
 cali_warn = cali_warn_org %>%
   group_by(effective_date = as.yearmon(effective_date)) %>%
+  # group_by(received_date = as.yearmon(received_date)) %>%
   summarise(total = sum(emp_num))
 
 # Texas ####
-texas_warn_1 = read_excel("data/Warn/texas/warn-act-listings-2021.xlsx")
-texas_warn_2 = read_excel("data/Warn/texas/warn-act-listings-2022.xlsx")
-texas_warn_3 = read_excel("data/Warn/texas/warn-act-listings-2023-twc.xlsx")
+texas_warn_1 = read_excel("data/WARN/texas/warn-act-listings-2021.xlsx")
+texas_warn_2 = read_excel("data/WARN/texas/warn-act-listings-2022.xlsx")
+texas_warn_3 = read_excel("data/WARN/texas/warn-act-listings-2023-twc.xlsx")
 
 texas_warn = rbind(texas_warn_1, texas_warn_2, texas_warn_3) %>%
     rename(effective_date = LayOff_Date,
@@ -118,3 +119,33 @@ illinois_warn = illinois_warn %>%
 # warn_total = rbind(illinois_warn, texas_warn, cali_warn, florida_warn) %>%
 #   group_by(effective_date) %>%
 #   summarise(total = sum(total))
+# /Users/nguyenthanhminh/Downloads/155161-V31/Archived_Vintages/WARNFiles_20230315/WARNData_NSA_20230315.csv
+warn_fed_data = 
+  # read.csv("/Users/nguyenthanhminh/Downloads/WARNFiles_20230414/WARNFactors_20230414.csv") %>%
+  read.csv("/Users/nguyenthanhminh/Downloads/155161-V31/Archived_Vintages/WARNFiles_20230315/WARNFactors_20230315.csv") %>%
+  mutate(date = as.Date(paste0(month, "-01"), format = "%Y-%m-%d")) %>%
+  select(date, WARN_sum) %>%
+  mutate(date = shift_date_series(x = date, m = 2)) %>%
+  mutate(yoy = n_month_growth_ann(WARN_sum, 12))
+  
+warn_fed_data_prev_years = warn_fed_data %>%
+  filter((date >= "2015-01-01" & date <= "2019-12-31")) %>%
+  group_by(month = month(date)) %>%
+  summarise(prev_years_value = mean(WARN_sum))
+
+
+warn_fed_data_2022 = warn_fed_data %>%
+  filter(date >= "2022-01-01") %>%
+  group_by(month = month(date)) %>%
+  left_join(warn_fed_data_prev_years, by = "month") %>%
+  mutate(yoy = WARN_sum / prev_years_value - 1) %>%
+  ungroup()
+
+
+# plot_ly(warn_fed_data, x=~date, y=~WARN_sum, type = "scatter", mode = "lines")
+# plot_ly(warn_fed_data, x=~date, y=~yoy, type = "scatter", mode = "lines")
+
+
+
+plot_ly(data = warn_fed_data_2022, x=~date, y=~yoy, type = "scatter", mode = "lines")
+

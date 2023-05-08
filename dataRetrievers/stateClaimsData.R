@@ -48,7 +48,21 @@ download_state_continuing_claims <- function(start_date, end_date){
   
 }
 
+download_state_insured_unemployment_rate <- function(start_date, end_date){
+  POST("https://fredaccount.stlouisfed.org/public/datalist/3324/download", 
+       encode = "form",
+       body = list(obs_start_date = start_date,
+                   obs_end_date = end_date,
+                   file_format = "xls",
+                   download_data ="Download Data"),
+       httr::write_disk("data/States Claims Data/insured_unrate.zip", overwrite = T))
+  unzip("data/States Claims Data/insured_unrate.zip",exdir = "data/States Claims Data", overwrite = T)
+  
+}
+
+# 
 add_week_to_config()
 config = read.csv("data/States Claims Data/config.csv")
 download_state_init_claims(config$init_start[1], config$init_end[1])
 download_state_continuing_claims(config$continuing_start[1], config$continuing_end[1])
+download_state_insured_unemployment_rate(config$continuing_start[1], config$continuing_end[1])

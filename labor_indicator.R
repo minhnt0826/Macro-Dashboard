@@ -1,22 +1,32 @@
+m_chng = 6
+
 temp_help = fred_request_data("TEMPHELPS") %>%
-  mutate(temp_help_3m = n_month_growth_ann(value, 3)) %>%
+  mutate(temp_help = scale(value)) %>%
+  mutate(temp_help_3m = n_month_growth_ann(value, m_chng)) %>%
   mutate(temp_help_3m = scale(temp_help_3m))
 
 residential = fred_request_data("CES2023610001") %>%
-  mutate(residential_3m = n_month_growth_ann(value, 3)) %>%
+  left_join(fred_request_data("CES2023800101"), by = "date") %>%
+  mutate(value = value.x + value.y) %>%
+  mutate(residential =  scale(value.x)) %>%
+  mutate(residential_building_3m = n_month_growth_ann(value.x, m_chng)) %>%
+  mutate(residential_3m = n_month_growth_ann(value, m_chng)) %>%
+  mutate(residential_3m = coalesce(residential_3m, residential_building_3m)) %>%
   mutate(residential_3m = scale(residential_3m))
 
 manufacturing = fred_request_data("MANEMP") %>%
-  mutate(manu_3m = n_month_growth_ann(value, 3)) %>%
+  mutate(manu =  scale(value)) %>%
+  mutate(manu_3m = n_month_growth_ann(value, m_chng)) %>%
   mutate(manu_3m = scale(manu_3m))
 
 
 job_losers_permanent = fred_request_data("LNS13026638") %>%
-  mutate(job_losers_3m = n_month_growth_ann(value, 3)) %>%
+  mutate(job_losers = scale(value)) %>%
+  mutate(job_losers_3m = n_month_growth_ann(value, m_chng)) %>%
   mutate(job_losers_3m = scale(job_losers_3m))
 
 partime_emp_econ_reasons = fred_request_data("LNS12032194") %>%
-  mutate(partime_econ_3m = n_month_growth_ann(value, 3)) %>%
+  mutate(partime_econ_3m = n_month_growth_ann(value, m_chng)) %>%
   mutate(partime_econ_3m = scale(partime_econ_3m))
 
 aggregate_weekly_hours = fred_request_data("AWHI") %>%
@@ -27,7 +37,8 @@ aggregate_weekly_hours = fred_request_data("AWHI") %>%
   filter(!is.na(chng_private)) %>%
   mutate(value = 100 * cumprod(chng_private)) %>%
   select(date, value) %>%
-  mutate(aggregate_weekly_hours_3m = n_month_growth_ann(value, 3)) %>%
+  mutate(aggregate_weekly_hours =  scale(value)) %>%
+  mutate(aggregate_weekly_hours_3m = n_month_growth_ann(value, m_chng)) %>%
   mutate(aggregate_weekly_hours_3m = scale(aggregate_weekly_hours_3m))
 
 
@@ -42,12 +53,10 @@ ic_claims = fred_request_data("ICSA", agg = "avg", freq = "m") %>%
   mutate(icsa = scale(icsa))
 
 unemployment_rate = fred_request_data("UNRATE") %>%
-  mutate(u3_rate = scale(value)) %>%
-  mutate(u3_rate = scale(value - lag(value, 6)))
+  mutate(u3_rate = scale(value))
 
 broad_unemployment_rate = fred_request_data("U6RATE") %>%
-  mutate(u6_rate = scale(value)) %>%
-  mutate(u6_rate = scale(value - lag(value, 6)))
+  mutate(u6_rate = scale(value))
 
 nfib_emp_plans = read_excel("data/NFIB/plans_increase_employment.xlsx") %>%
   mutate(date = as.Date(`Month/Year`)) %>%
@@ -58,14 +67,18 @@ nfib_emp_plans = read_excel("data/NFIB/plans_increase_employment.xlsx") %>%
 nfib_jobs_opening = read_excel("data/NFIB/with_vacant_position.xlsx") %>%
   mutate(date = as.Date(`Month/Year`)) %>%
   mutate(nfib_jobs_opening = as.numeric(`Current Job Openings`)) %>%
-  add_row(date = as.Date("2023-03-01"), nfib_jobs_opening = 43) 
-
+  add_row(date = as.Date("2023-03-01"), nfib_jobs_opening = 43) %>%
+  mutate(nfib_jobs_opening = scale(nfib_jobs_opening))
+  
 unemployed_to_employed_flows = fred_request_data("LNS17100000") %>%
   left_join(fred_request_data("UNEMPLOY"), by = "date") %>%
-  mutate(unemployed_employed_flows = SMA(value.x / value.y, 3))
+  mutate(unemployed_employed_flows = SMA(SMA(value.x / value.y, 3),2))
 
-insured_unemployment_rate = fred_request_data("IURSA", agg = "eop", freq = "m") %>%
+plot_ly(unemployed_to_employed_flows, x=~date, y=~unemployed_employed_flows, mode = "lines")
+
+insured_unemployment_rate = fred_request_data("IURSA", agg = "avg", freq = "m") %>%
   mutate(insured_unrate = value)
+  # mutate(insured_unrate = scale(insured_unrate - lag(insured_unrate, 6)))
 
 fed_survey_emp = phil_man %>%
   left_join(texas_man, by = 'date') %>%
@@ -79,10 +92,13 @@ fed_survey_emp = phil_man %>%
   left_join(richmond_man, by = 'date') %>%
   left_join(richmond_svc, by = 'date') %>%
   mutate(date = as.Date(date)) %>%
-  select(contains("date") | starts_with("employment")) %>%
+  select(contains("date") | contains("employment")) %>%
   create_z_scores_for_df(.) %>%
   filter(date >= "1994-04-01") %>%
   rename(fed_surveys_emp = mean.z)
+
+manu_overtime_hours = fred_request_data("AWOTMAN") %>%
+  mutate(manu_overtime_hours = value)
 
 jolts = fred_request_data("JTSJOL") %>%
   mutate(date = shift_date_series(date, yr = 0, m = 1))
@@ -102,6 +118,7 @@ dataset = temp_help %>%
   left_join(unemployed_to_employed_flows, by = "date") %>%
   left_join(insured_unemployment_rate, by = "date") %>%
   left_join(fed_survey_emp, by = "date") %>%
+  left_join(manu_overtime_hours, by = "date") %>%
   select(date,
          temp_help_3m,
          residential_3m,
@@ -112,16 +129,26 @@ dataset = temp_help %>%
          ccsa, icsa,
          u3_rate, u6_rate,
          nfib_plans, nfib_jobs_opening,
-         unemployed_employed_flows,
+         # unemployed_employed_flows,
          insured_unrate,
-         fed_surveys_emp) %>%
-  filter(date >= "1994-04-01")
+         fed_surveys_emp,
+         manu_overtime_hours) %>%
+  filter(date >= "1994-07-01")
+
+pca_rotated = psych::principal(dataset[, -1], rotate = "varimax", nfactors = 2, scores = TRUE)
+
+dataset_rotated = dataset %>%
+  select("date") %>%
+  bind_cols(pca_rotated$scores %>% as.data.frame() %>% round(3)) %>% 
+  arrange(date) %>%
+  rename("activity" = "RC1") %>%
+  rename("momentum" = "RC2")
 
 
 pca_model <- princomp(dataset[, -1], cor = TRUE)
 pca_summary <- summary(pca_model, loadings = TRUE, scores = TRUE, cutoff = 0)
 
-dataset = dataset %>% dplyr::select("date") %>% 
+dataset_unrotated = dataset %>% dplyr::select("date") %>% 
   bind_cols(pca_summary$scores %>% as.data.frame() %>% round(3)) %>% 
   arrange(date) %>%
   rename("activity" = "Comp.1") %>%
@@ -129,15 +156,21 @@ dataset = dataset %>% dplyr::select("date") %>%
          chng_6m = activity - lag(activity, 6),
          chng_3m = activity - lag(activity, 3))
 
-plot1 = plot_ly(dataset, x=~date, y=~activity, type = "scatter", mode = "lines")
-plot1
+labor_market_activity_plot = plot_ly(dataset_unrotated, x=~date, y=~activity, type = "scatter", mode = "lines")
 
-plot1.1 = plot_ly(dataset, x=~date, y=~chng_12m, type = "scatter", mode = "lines") %>%
-  add_trace(y=~chng_6m, name = "6m") %>%
-  add_trace(y=~chng_3m, name = "3m")
 
-plot1.1
+# plot1.1 = plot_ly(dataset, x=~date, y=~chng_12m, type = "scatter", mode = "lines") %>%
+#   add_trace(y=~chng_6m, name = "6m") %>%
+#   add_trace(y=~chng_3m, name = "3m")
+# 
+# plot1.1
 
+plot_ly(dataset_rotated, x=~date, y=~activity, type = "scatter", mode = "lines")
+plot_ly(dataset_rotated, x=~date, y=~-momentum, type = "scatter", mode = "lines")
+
+# plot_ly(dataset, x=~date, y=~Comp.2, type = "scatter", mode = "lines")
+# plot_ly(dataset, x=~date, y=~Comp.3, type = "scatter", mode = "lines")
+# plot_ly(dataset, x=~date, y=~Comp.4, type = "scatter", mode = "lines")
 # plot2 = plot_ly(dataset, x=~date, y=~`Comp.2`, type = "scatter", mode = "lines")
 # plot2
 

@@ -74,7 +74,7 @@ all_items_ex_shelter_cpi_plot = create_plotly_plot_with_growth_data(all_items_ex
 ppi_final_demand = fred_request_data("PPIFIS") %>%
   create_growth_data_for_df(., .$value)
 
-ppi_final_demand_core = fred_request_data("PPICOR") %>%
+ppi_final_demand_core = fred_request_data("PPIFES") %>%
   create_growth_data_for_df(., .$value)
 
 ppi_stage_4 = fred_request_data("WPUID54" )%>%

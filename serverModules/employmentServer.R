@@ -15,6 +15,12 @@ aggregate_payrolls = fred_request_data("CES0500000017") %>%
 aggregate_payrolls_production = fred_request_data("CES0500000035") %>%
   create_growth_data_for_df(., . $value)
 
+aggregate_weekly_hours = fred_request_data("AWHAE") %>%
+  create_growth_data_for_df(., . $value)
+
+aggregate_weekly_hours_production = fred_request_data("AWHI") %>%
+  create_growth_data_for_df(., . $value)
+
 temp_help_emp = fred_request_data("TEMPHELPS")
 overtime_hours_man = fred_request_data("CES3000000004")
 partime_emp_econ_reasons = fred_request_data("LNS12032194")
@@ -64,7 +70,15 @@ aggregate_payrolls_plot <- create_plotly_plot_with_growth_data(aggregate_payroll
   layout(title = 'Aggregate weekly payrolls')
 
 aggregate_payrolls_production_plot <- create_plotly_plot_with_growth_data(aggregate_payrolls_production, growth_1m = T) %>%
-  layout(title = 'Aggregate weekly payrolls roduction and nonsupervisory employees')
+  layout(title = 'Aggregate weekly payrolls production and nonsupervisory employees')
+
+
+aggregate_weekly_hours_plot <- create_plotly_plot_with_growth_data(aggregate_weekly_hours, growth_1m = T) %>%
+  layout(title = 'Aggregate weekly hours')
+
+aggregate_weekly_hours_production_plot <- create_plotly_plot_with_growth_data(aggregate_weekly_hours_production, growth_1m = T) %>%
+  layout(title = 'Aggregate weekly hours production and nonsupervisory employees')
+
 
 avg_hourly_earnings_plot = create_plotly_plot_with_growth_data(avg_hourly_earnings) %>%
   layout(title = "avg hourly earnings annualized")
@@ -113,6 +127,7 @@ nfp_plot5.4 <- plot_ly(partime_emp_econ_reasons, x = ~date, y = ~growth_12m, typ
 
 job_losers_permanent_plot = fred_request_data("LNS13026638") %>%
   plot_ly(.,x = ~date, y = ~value, type = 'scatter', mode = 'lines') %>%
+  add_trace(x = ~date, y = ~ SMA(value, 3), name = "3ma") %>%
   layout(title = 'Job losers permanent')
 
 job_losers_permanent_growth_plot = fred_request_data("LNS13026638") %>%
@@ -199,7 +214,7 @@ change_over_local_low <- function(x, n, na.rm = TRUE) {
   return (x + rollmax(-x, n, align = "right", fill = NA))
 }
 
-states_unemployment_data = read_excel("/Users/nguyenthanhminh/Documents/Stocks/Macro Dashboard/data/States unemployment data/States_unemployment_rate.xls", sheet = 2)
+states_unemployment_data = read_excel("data/States unemployment data/States_unemployment_rate.xls", sheet = 2)
 states_unemployment_data = states_unemployment_data %>%
   mutate_at(vars(-DATE), ~change_over_local_low(., 18)) %>%
   mutate(sahm_triggered = rowSums(. >= 0.5) - 1)
@@ -215,6 +230,11 @@ kansas_labor_activity_plot = fred_request_data("FRBKCLMCILA") %>%
   plot_ly(., x=~date, y=~chng_6m, mode = "lines")
 kansas_labor_activity_plot
 
+# Labor activity
+source("serverModules/employment/labor_indicator.R")
+
+# Unemployment indicators
+source("serverModules/employment/unemployment_indicators.R")
 
 # Shiny server ####
 employmentServer <- function(id) {
@@ -228,6 +248,15 @@ employmentServer <- function(id) {
       output$aggregate_payrolls_production_plot <- renderPlotly({
         aggregate_payrolls_production_plot
       })
+      
+      output$aggregate_weekly_hours_plot <- renderPlotly({
+        aggregate_weekly_hours_plot
+      })
+      
+      output$aggregate_weekly_hours_production_plot <- renderPlotly({
+        aggregate_weekly_hours_production_plot
+      })
+      
       
       output$temp_help_plot1 <- renderPlotly({
         temp_help_plot1
@@ -384,6 +413,10 @@ employmentServer <- function(id) {
       
       output$claims_plot1.2 <- renderPlotly({
         claims_plot1.2
+      })      
+      
+      output$claims_plot1.3 <- renderPlotly({
+        claims_plot1.3
       })
       
       output$claims_plot2.1 <- renderPlotly({
@@ -417,6 +450,26 @@ employmentServer <- function(id) {
       
       output$initial_claims_breath_plot <- renderPlotly({
         initial_claims_breath_plot
+      })
+      
+      output$initial_claims_breath_plot <- renderPlotly({
+        initial_claims_breath_plot
+      })
+      
+      output$permanent_unrate_ma3_ma12_plot <- renderPlotly({
+        permanent_unrate_ma3_ma12_plot
+      })
+      
+      output$unemployment_rate_u2_ma3_ma12_plot <- renderPlotly({
+        unemployment_rate_u2_ma3_ma12_plot
+      })
+      
+      output$unemployment_rate_ma3_ma12_plot <- renderPlotly({
+        unemployment_rate_ma3_ma12_plot
+      })
+      
+      output$insured_unemployment_rate_yoy_plot <- renderPlotly({
+        insured_unemployment_rate_yoy_plot
       })
     }
   )

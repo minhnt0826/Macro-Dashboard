@@ -48,12 +48,22 @@ real_odl = fred_request_data("ODSACBM027SBOG") %>%
          growth_12m = n_month_growth_ann(value, 12))
 
 real_odl_plot1 =  plot_ly(real_odl, x = ~date, y = ~value, type = 'scatter', mode = 'lines') %>%
-  layout(title = 'Real odl (Other deposits at commercial banks deflated by CPI)')
+  layout(title = 'Real odl (Other deposits at commercial banks deflated by CPI)',
+         yaxis = list(type = "log"))
 
 real_odl_plot2 = plot_ly(real_odl, x = ~date, y = ~growth_3m, type = 'scatter', mode = 'lines', name = "3m") %>%
   add_trace(y = ~growth_6m, name = "6m") %>%
   add_trace(y = ~growth_12m, name = "12m") %>%
   layout(title = "Real odl growth")
+
+total_consumer_credit = fred_request_data("TOTALSLAR") %>%
+  rename(change_annualized = value) %>%
+  mutate(change = ((100 + change_annualized) / 100)^(1/12)) %>%
+  mutate(value = 100 * cumprod(change)) %>%
+  mutate(growth_3m = n_month_growth_ann(value, 3),
+         growth_6m = n_month_growth_ann(value, 6),
+         growth_12m = n_month_growth_ann(value, 12))
+
 
 bank_credit = fred_request_data("H8B1001NCBCMG") %>%
   rename(change_annualized = value) %>%
@@ -96,6 +106,9 @@ consumer_loans = fred_request_data("H8B1029NCBCMG") %>%
          growth_12m = n_month_growth_ann(value, 12),
          growth_5y = n_month_growth_ann(value, 60),
          growth_10y = n_month_growth_ann(value, 120))
+
+total_consumer_credit_plot = create_plotly_plot_with_growth_data(total_consumer_credit) %>%
+  layout(title = 'Total consumer credit')
 
 
 bank_credit_plot1.1 = plot_ly(data = bank_credit, x = ~date, y = ~growth_3m, type = 'scatter', mode = 'lines') %>%
@@ -267,6 +280,10 @@ monetaryServer <- function(id) {
 
       output$bank_credit_plot1.1 <- renderPlotly({
         bank_credit_plot1.1
+      })
+      
+      output$total_consumer_credit_plot <- renderPlotly({
+        total_consumer_credit_plot
       })
       
       output$bank_credit_plot1.2 <- renderPlotly({
