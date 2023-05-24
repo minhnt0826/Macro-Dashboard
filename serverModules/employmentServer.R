@@ -236,6 +236,8 @@ source("serverModules/employment/labor_indicator.R")
 # Unemployment indicators
 source("serverModules/employment/unemployment_indicators.R")
 
+
+
 # Shiny server ####
 employmentServer <- function(id) {
   moduleServer(
@@ -431,6 +433,10 @@ employmentServer <- function(id) {
         cc_claims_vs_prev_years_plot
       })
       
+      output$insured_unrate_vs_prev_years_plot <- renderPlotly({
+        insured_unrate_vs_prev_years_plot
+      })
+      
       output$ic_claims_vs_prev_years_plot <- renderPlotly({
         ic_claims_vs_prev_years_plot
       })
@@ -446,6 +452,10 @@ employmentServer <- function(id) {
       
       output$continuing_claims_breath_plot <- renderPlotly({
         continuing_claims_breath_plot
+      })
+      
+      output$states_insured_unrate_breath_plot <- renderPlotly({
+        states_insured_unrate_breath_plot
       })
       
       output$initial_claims_breath_plot <- renderPlotly({
@@ -471,6 +481,11 @@ employmentServer <- function(id) {
       output$insured_unemployment_rate_yoy_plot <- renderPlotly({
         insured_unemployment_rate_yoy_plot
       })
+      
+      output$labor_market_activity_plot <- renderPlotly({
+        labor_market_activity_plot
+      })
+      
     }
   )
 }

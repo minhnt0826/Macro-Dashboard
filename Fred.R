@@ -2,11 +2,13 @@ library(dplyr)
 
 source("dataRetrievers/fredDataUpdater.R")
 
-data_folder_path = "data/Fred"
+
 
 fred_request_data <- function(series_id, start_date = "1900-01-01", end_date = "2100-01-01", force_new = FALSE,
                               freq = "", agg = "")
 {
+  data_folder_path = "data/Fred"
+  
   fred_series_requested(series_id, freq, agg)
   
   key = paste0(series_id, "_", freq, "_", agg)

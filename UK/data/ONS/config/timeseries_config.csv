@@ -1,0 +1,12 @@
+"key","description","ons_url","seas_adjusted"
+"UKCPI","CPI all items","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/d7bt/mm23",FALSE
+"UKCPIGOODS","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/d7f4/mm23",FALSE
+"UKCPISERVICES","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/d7f5/mm23",FALSE
+"UKPPIOUTPUT","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/gb7s/mm22",FALSE
+"UKPPIINPUT","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/ghip/mm22",FALSE
+"UKGDPPRICE","","https://www.ons.gov.uk/generator?format=csv&uri=economy/grossdomesticproductgdp/timeseries/l8gg/pn2",TRUE
+"UKPPIOUTPUTFOOD","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/gb7u/ppi",FALSE
+"UKRSIEXFUEL","","https://www.ons.gov.uk/generator?format=csv&uri=/businessindustryandtrade/retailindustry/timeseries/j468/drsi",TRUE
+"UKRSIEXFUELVOL","","https://www.ons.gov.uk/generator?format=csv&uri=/businessindustryandtrade/retailindustry/timeseries/j467/drsi",TRUE
+"UKTOTALHOURSWORKED","","https://www.ons.gov.uk/generator?format=csv&uri=employmentandlabourmarket/peopleinwork/employmentandemployeetypes/timeseries/ybus/lms",TRUE
+"UKCORECPI","","https://www.ons.gov.uk/generator?format=csv&uri=/economy/inflationandpriceindices/timeseries/dkc6/mm23",FALSE

@@ -4,6 +4,9 @@ employmentUI <- function(id)
   
   tabsetPanel(
     tabPanel(title = "Employment Index", 
+             fluidRow(
+               box(plotlyOutput(ns("labor_market_activity_plot"), height = 400), width = 12)
+             ),
     ),
     tabPanel(title = "NFP", 
              fluidRow(
@@ -160,8 +163,13 @@ employmentUI <- function(id)
                  tabPanel("Tab1", plotlyOutput(ns("claims_plot2.1"))),
                  tabPanel("Tab2", plotlyOutput(ns("claims_plot2.2")))
                )
-             ),fluidRow(
-               box(plotlyOutput(ns("cc_claims_vs_prev_years_plot"), height = 400), width = 12)
+             ),
+             fluidRow(
+               tabBox(
+                 id = "cclaims_vs_prev_years",
+                 tabPanel("Tab1", plotlyOutput(ns("cc_claims_vs_prev_years_plot"))),
+                 tabPanel("Tab2", plotlyOutput(ns("insured_unrate_vs_prev_years_plot")))
+               )
              ),
              fluidRow(
                box(plotlyOutput(ns("ic_claims_vs_prev_years_plot"), height = 400), width = 12)
@@ -174,6 +182,9 @@ employmentUI <- function(id)
              ),
              fluidRow(
                box(plotlyOutput(ns("continuing_claims_breath_plot"), height = 400), width = 12)
+             ),
+             fluidRow(
+               box(plotlyOutput(ns("states_insured_unrate_breath_plot"), height = 400), width = 12)
              ),
              fluidRow(
                box(plotlyOutput(ns("initial_claims_breath_plot"), height = 400), width = 12)

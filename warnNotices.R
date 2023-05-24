@@ -120,32 +120,32 @@ illinois_warn = illinois_warn %>%
 #   group_by(effective_date) %>%
 #   summarise(total = sum(total))
 # /Users/nguyenthanhminh/Downloads/155161-V31/Archived_Vintages/WARNFiles_20230315/WARNData_NSA_20230315.csv
-warn_fed_data = 
+# warn_fed_data = 
   # read.csv("/Users/nguyenthanhminh/Downloads/WARNFiles_20230414/WARNFactors_20230414.csv") %>%
-  read.csv("/Users/nguyenthanhminh/Downloads/155161-V31/Archived_Vintages/WARNFiles_20230315/WARNFactors_20230315.csv") %>%
-  mutate(date = as.Date(paste0(month, "-01"), format = "%Y-%m-%d")) %>%
-  select(date, WARN_sum) %>%
-  mutate(date = shift_date_series(x = date, m = 2)) %>%
-  mutate(yoy = n_month_growth_ann(WARN_sum, 12))
+  # read.csv("/Users/nguyenthanhminh/Downloads/155161-V31/Archived_Vintages/WARNFiles_20230315/WARNFactors_20230315.csv") %>%
+  # mutate(date = as.Date(paste0(month, "-01"), format = "%Y-%m-%d")) %>%
+  # select(date, WARN_sum) %>%
+  # mutate(date = shift_date_series(x = date, m = 2)) %>%
+  # mutate(yoy = n_month_growth_ann(WARN_sum, 12))
   
-warn_fed_data_prev_years = warn_fed_data %>%
-  filter((date >= "2015-01-01" & date <= "2019-12-31")) %>%
-  group_by(month = month(date)) %>%
-  summarise(prev_years_value = mean(WARN_sum))
-
-
-warn_fed_data_2022 = warn_fed_data %>%
-  filter(date >= "2022-01-01") %>%
-  group_by(month = month(date)) %>%
-  left_join(warn_fed_data_prev_years, by = "month") %>%
-  mutate(yoy = WARN_sum / prev_years_value - 1) %>%
-  ungroup()
-
-
-# plot_ly(warn_fed_data, x=~date, y=~WARN_sum, type = "scatter", mode = "lines")
-# plot_ly(warn_fed_data, x=~date, y=~yoy, type = "scatter", mode = "lines")
-
-
-
-plot_ly(data = warn_fed_data_2022, x=~date, y=~yoy, type = "scatter", mode = "lines")
-
+# warn_fed_data_prev_years = warn_fed_data %>%
+#   filter((date >= "2015-01-01" & date <= "2019-12-31")) %>%
+#   group_by(month = month(date)) %>%
+#   summarise(prev_years_value = mean(WARN_sum))
+# 
+# 
+# warn_fed_data_2022 = warn_fed_data %>%
+#   filter(date >= "2022-01-01") %>%
+#   group_by(month = month(date)) %>%
+#   left_join(warn_fed_data_prev_years, by = "month") %>%
+#   mutate(yoy = WARN_sum / prev_years_value - 1) %>%
+#   ungroup()
+# 
+# 
+# # plot_ly(warn_fed_data, x=~date, y=~WARN_sum, type = "scatter", mode = "lines")
+# # plot_ly(warn_fed_data, x=~date, y=~yoy, type = "scatter", mode = "lines")
+# 
+# 
+# 
+# plot_ly(data = warn_fed_data_2022, x=~date, y=~yoy, type = "scatter", mode = "lines")
+# 

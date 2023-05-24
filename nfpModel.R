@@ -358,3 +358,4 @@ main_nfp_full = main_nfp_full %>%
   mutate(focus_group_chng = focus_group - lag(focus_group, 1),
          usgovt_chng = usgovt - lag(usgovt, 1)) %>%
   mutate(total_chng = mean_pred_chng_nfp_main + chng_man + usgovt_chng + focus_group_chng)
+

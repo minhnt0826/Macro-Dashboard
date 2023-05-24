@@ -132,13 +132,14 @@ dataset = dataset %>% dplyr::select("date") %>%
          chng_6m = activity - lag(activity, 6),
          chng_3m = activity - lag(activity, 3))
 
-labor_market_activity_plot = plot_ly(dataset, x=~date, y=~activity, type = "scatter", mode = "lines")
+labor_market_activity_plot = plot_ly(dataset, x=~date, y=~activity, type = "scatter", mode = "lines") %>%
+  layout(title = "Labor market index. PCA from 15 components")
 
-plot1.1 = plot_ly(dataset, x=~date, y=~chng_12m, type = "scatter", mode = "lines") %>%
-  add_trace(y=~chng_6m, name = "6m") %>%
-  add_trace(y=~chng_3m, name = "3m")
-
-plot1.1
+# plot1.1 = plot_ly(dataset, x=~date, y=~chng_12m, type = "scatter", mode = "lines") %>%
+#   add_trace(y=~chng_6m, name = "6m") %>%
+#   add_trace(y=~chng_3m, name = "3m")
+# 
+# plot1.1
 
 # plot2 = plot_ly(dataset, x=~date, y=~`Comp.2`, type = "scatter", mode = "lines")
 # plot2

@@ -225,6 +225,15 @@ diff_3m_to_5y5y_plot = plot_ly(diff_rate_to_5y5y, x = ~date, y = ~tightness_3m, 
 
 diff_1y_to_5y5y_plot = plot_ly(diff_rate_to_5y5y, x = ~date, y = ~tightness_1y, type = "scatter", mode = "lines", connectgaps = TRUE) %>%
   layout(title = "5y5y forward minus 1 year treasury rate")
+
+proxy_fed_funds = read_excel("data/SF Fed/proxyfedfunds.xlsx", skip = 8) %>%
+  select(date = Date,
+         proxy_fed_funds = `Proxy funds rate`) %>%
+  mutate(date = as.Date(format(date, "%Y-%m-01"))) %>%
+  left_join(fred_request_data("DGS10", freq = "m"), by = "date") %>%
+  mutate(curve_10y_proxyff = value - proxy_fed_funds)
+
+# plot_ly(proxy_fed_funds, x =~date, y=~curve_10y_proxyff, mode = "lines")
   
 # consumer_credit = fred_request_data("TOTALSL")
 # consumer_credit_plot = create_plotly_plot_with_series(consumer_credit, consumer_credit$value)
@@ -243,6 +252,16 @@ diff_1y_to_5y5y_plot = plot_ly(diff_rate_to_5y5y, x = ~date, y = ~tightness_1y, 
 # 
 # credit_plot2 <- plot_ly(gov_debt, x = ~date, y = ~yoy, type = 'scatter', mode = 'lines') %>%
 #   layout(title = 'gov_debt')
+
+
+# Yield curve vs SPX ####
+curve10s2s = read.csv("data/Fred/T10Y2Y_w_avg.csv") %>%
+  mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+  filter(!is.na(value)) %>%
+  mutate(ema52 = EMA(value, n = 52))
+
+plot_ly(curve10s2s, x = ~date, y = ~ema52, type = 'scatter', mode = 'lines') 
+
 
 total_debt = fred_request_data("TODNS") %>%
   mutate(chng = value / lag(value, 20))

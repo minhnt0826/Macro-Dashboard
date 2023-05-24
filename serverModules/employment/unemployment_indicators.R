@@ -46,3 +46,5 @@ insured_unemployment_rate_yoy_plot = plot_ly(insured_unemployment_rate, x=~date,
 
 insured_employment_yoy_plot = plot_ly(insured_unemployment_rate, x=~date, y=~yoy_insured_employment, mode = "lines") %>%
   layout(title = "Insured employment yoy")  
+
+plot_ly(insured_unemployment_rate, x=~date, y=~value - lag(value, 52), mode = "lines")

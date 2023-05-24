@@ -103,15 +103,18 @@ ICSA = fred_request_data("ICSA")
 
 # Compared vs previous years ####
 CCNSA_prev_years = fred_request_data("CCNSA") %>%
-  filter((date >= "2018-01-01" & date <= "2019-12-31") | (date >= "2022-01-01" & date <= "2022-12-31")) %>%
-  populate_week(.) %>%
+  filter((date >= "2017-01-01" & date <= "2019-12-31")) %>%
+  populate_week(.) 
+
+CCNSA_prev_years = CCNSA_prev_years %>%
   group_by(week) %>%
   summarise(prev_years_value = mean(value))
 
 
 CCNSA_2023 = fred_request_data("CCNSA") %>%
-  filter(date >= "2023-01-01") %>%
+  filter(date >= "2022-01-01") %>%
   populate_week(.) %>%
+  mutate(week = ifelse(date >= "2022-01-01" & date <= "2022-12-31" , week - 1, week)) %>%
   left_join(CCNSA_prev_years, by = "week") %>%
   mutate(yoy = (value / prev_years_value) - 1)
 
@@ -119,42 +122,60 @@ insured_unrate_prev_years = fred_request_data("CCNSA") %>%
   left_join(fred_request_data("COVEMP"), by = "date") %>%
   fill(names(.), .direction = "down") %>%
   mutate(value = (value.x / value.y) * 100) %>%
-  filter((date >= "2018-01-01" & date <= "2019-12-31") | (date >= "2022-01-01" & date <= "2022-12-31")) %>%
-  populate_week(.) %>%
+  filter((date >= "2017-01-01" & date <= "2019-12-31")) %>%
+  populate_week(.)
+
+insured_unrate_prev_years = insured_unrate_prev_years %>%
   group_by(week) %>%
   summarise(prev_years_value = mean(value))
+
 
 insured_unrate_2023 = fred_request_data("CCNSA") %>%
   left_join(fred_request_data("COVEMP"), by = "date") %>%
   fill(names(.), .direction = "down") %>%
   mutate(value = (value.x / value.y) * 100) %>%
-  filter(date >= "2023-01-01") %>%
+  filter(date >= "2022-01-01") %>%
   populate_week(.) %>%
+  mutate(week = ifelse(date >= "2022-01-01" & date <= "2022-12-31" , week - 1, week)) %>%
   left_join(insured_unrate_prev_years, by = "week") %>%
   mutate(yoy_chng = value - prev_years_value)
 
 ICNSA_prev_years = fred_request_data("ICNSA") %>%
-  filter((date >= "2018-01-01" & date <= "2019-12-31") | (date >= "2022-01-01" & date <= "2022-12-31") ) %>%
-  populate_week(.) %>%
+  left_join(fred_request_data("MAICLAIMS"), by = "date") %>%
+  mutate(value = value.x - value.y) %>%
+  filter((date >= "2017-01-01" & date <= "2019-12-31")) %>%
+  populate_week(.)
+
+ICNSA_prev_years = ICNSA_prev_years %>%
   group_by(week) %>%
   summarise(prev_years_value = mean(value))
 
-
 ICNSA_2023 = fred_request_data("ICNSA") %>%
-  filter(date >= "2023-01-01") %>%
+  left_join(fred_request_data("MAICLAIMS"), by = "date") %>%
+  mutate(value = value.x - value.y) %>%
+  filter(date >= "2022-01-01") %>%
   populate_week(.) %>%
+  mutate(week = ifelse(date >= "2022-01-01" & date <= "2022-12-31" , week - 1, week)) %>%
   left_join(ICNSA_prev_years, by = "week") %>%
   mutate(yoy = value / prev_years_value - 1)
 
-cc_claims_vs_prev_years_plot <- plot_ly(CCNSA_2023, x = ~date, y = ~yoy, type = 'bar') %>%
-  layout(title = "Continuing claims 2023 vs avg years (2018, 2019, 2022)")
+cc_claims_vs_prev_years_plot <- plot_ly(CCNSA_2023, x = ~date, y = ~yoy*100, type = 'bar') %>%
+  layout(title = "Continuing claims NSA vs avg years (2017, 2018, 2019)")
 
 insured_unrate_vs_prev_years_plot <- plot_ly(insured_unrate_2023, x = ~date, y = ~yoy_chng, type = 'bar') %>%
-  layout(title = "Insured unemployment rate 2023 change vs avg years (2018, 2019, 2022)")
+  layout(title = "Insured unemployment rate change vs avg years (2017, 2018, 2019)")
 
 ic_claims_vs_prev_years_plot <- plot_ly(ICNSA_2023, x = ~date, y = ~yoy, type = 'bar') %>%
-  layout(title = "Initial claims 2023 vs avg years (2018, 2019, 2022)")
+  layout(title = "Initial claims vs avg years (2017, 2018, 2019) (ex-massa)")
 
+
+# ICNSA = fred_request_data("ICNSA") %>% 
+#   left_join(fred_request_data("MAICLAIMS"), by = "date") %>%
+#   mutate(value = value.x - value.y)
+# 
+# ICNSA$value.y[2941] = 20901
+# 
+# plot_ly(ICNSA, x = ~date, y = ~value - lag(value, 52), mode = 'lines')
 # Claims ####
 
 CCNSA = populate_week(CCNSA)
@@ -179,7 +200,7 @@ claims_plot2.1 <- plot_ly(ICSA, x = ~date, y = ~value, type = 'scatter', mode = 
          xaxis = list(type = 'date', tickformat = "%m %Y"))
 
 claims_plot2.2 <- plot_ly(ICNSA, x = ~date, y = ~growth_12m, type = 'scatter', mode = 'lines') %>%
-  add_trace(y = ~SMA(growth_12m, 8)) %>%
+  add_trace(y = ~SMA(growth_12m, 4)) %>%
   layout(title = 'Initial claims YoY')
 
 # claims_plot3 <- plot_ly(cc_post_covid, x = ~date, y = ~yoy_vs_pre_covid, type = 'scatter', mode = 'lines') %>%

@@ -66,7 +66,8 @@ all_items_ex_shelter_cpi = fred_request_data("CUSR0000SA0L2") %>%
          growth_6m = n_month_growth_ann(value, 6),
          growth_12m = n_month_growth_ann(value, 12))
 
-all_items_ex_shelter_cpi_plot = create_plotly_plot_with_growth_data(all_items_ex_shelter_cpi)
+all_items_ex_shelter_cpi_plot = create_plotly_plot_with_growth_data(all_items_ex_shelter_cpi) %>%
+  layout(title = "CPI all items ex shelter")
 
 
 # PPI ####

@@ -2,6 +2,9 @@ library(TTR)
 library(dplyr)
 library(plotly)
 library(lubridate)
+library(zoo)
+library(seasonal)
+
 
 n_month_growth_ann <- function(x, n, na.rm = TRUE) {
   return( ((x / lag(x, n)) ^ (12/n) - 1) * 100 )
@@ -18,7 +21,8 @@ create_growth_data_for_df <- function(data, series){
     mutate(growth_1m = n_month_growth_ann(series , 1),
            growth_3m = n_month_growth_ann(series , 3),
            growth_6m = n_month_growth_ann(series , 6),
-           growth_12m = n_month_growth_ann(series , 12))
+           growth_12m = n_month_growth_ann(series , 12),
+           growth_3m3m = ((SMA(series, 3) / SMA(lag(series, 3), 3))^4 - 1) * 100)
     
   return (df)
 }
@@ -90,6 +94,15 @@ add_months_to_df  <- function(df, num_months){
   return (df_new)
 }
 
+seasonal_adjust_series <- function(series, date_start) {
+  series_ts = ts(series, start = date_start, frequency = 12)
+
+  seas_model = seas(series_ts)
+
+  seas_model_df = as.data.frame(seas_model)
+  
+  return(seas_model_df$final)
+}
 # create_plotly_plot_with_series <- function(data, series, sma = F) {
 # 
 #   plot1 = plot_ly(data, x = ~date, y = ~n_month_growth_ann(series , 3), type = 'scatter', mode = 'lines', name = "3m") %>%

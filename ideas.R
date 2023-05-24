@@ -238,72 +238,111 @@ housing_under_construction_lm = fred_request_data("CES2023610001") %>%
 #   add_trace(y = ~(y_pred_knn + y_pred_linear) / 2, name = "mean")
 # plot
 
+# 
+# personal_witholding = fred_request_data("W988RC1Q027SBEA") %>%
+#   left_join(fred_request_data("W279RC1Q027SBEA"), by = "date") %>%
+#   mutate(net_investment = value.x - value.y) %>%
+#   left_join(fred_request_data("W986RC1Q027SBEA"), by = "date") %>%
+#   mutate(witholding = value - net_investment) %>%
+#   select(date, witholding) %>%
+#   mutate(value = witholding / 4) %>%
+#   mutate(cum_value = 60 + cumsum(value)) %>%
+#   select(date, cum_value ) %>%
+#   left_join(fred_request_data("CPIAUCSL"), by = "date") %>%
+#   mutate(real_witholding = cum_value / value) %>%
+#   create_growth_data_for_df(., .$real_witholding)
+# 
+# plot = plot_ly(personal_witholding, x = ~date, y = ~real_witholding, type = "scatter", mode = "lines") %>%
+#   layout(yaxis = list(type = "log"))
+# plot
+# 
+# plot1 = create_plotly_plot_with_growth_data(personal_witholding)
+# plot1
+# 
+# 
+# 
+# 
+# 
+# 
+# data = read.csv("/Users/nguyenthanhminh/Downloads/ESMS_SeasonallyAdjusted_Diffusion.csv") %>%
+#   mutate(date = as.Date(surveyDate)) %>%
+#   mutate(chng = NOCDISA - lag(NOCDISA, 1))
+# 
+# plot_ly(data, x=~date, y=~chng, mode = "lines")
+# 
+# 
+# 
+# 
+# 
+# 
+# uk_m4 = boe_request_data("RPMB53Q") %>%
+#   left_join(fred_request_data("GBRCPICORMINMEI"), by = "date")
+#   
+# uk_m4$value.y[165] = 122 
+# 
+# 
+# 
+# uk_m4 = uk_m4 %>%
+#   mutate(real_m4 = value.x / value.y)
+# 
+# plot = plot_ly(uk_m4, x = ~date, y = ~real_m4, type = "scatter", mode = "lines") %>%
+#   layout(title = "real m4",
+#          yaxis = list(type = "log"))
+# 
+# plot
+# 
+# m4_plot = uk_m4 %>%
+#   create_growth_data_for_df(., .$real_m4) %>%
+#   create_plotly_plot_with_growth_data(.)
+# 
+# m4_plot
+# 
+# 
+# plot1.1 = plot_ly(uk_m4, x = ~date, y = ~real_m4_lending, type = "scatter", mode = "lines") %>%
+#   layout(title = "real m4 lending")
+# 
+# plot1.1
+# 
+# 
+# 
+# 
+# 
+# source("UK/dataRetrievers/boeData.R")
+# 
+# uk_retail_deposits = boe_request_data("LPMB3SF")
+# uk_m4 = boe_request_data("RPMB53Q")
+# 
+# LPMB3SF
+# uk_retail_deposits = read.csv("/Users/nguyenthanhminh/Downloads/boe_retail_dep.csv")
+# colnames(uk_retail_deposits) = c("date","deposits")
+# 
+# uk_retail_deposits = uk_retail_deposits %>%
+#   mutate(date = as.Date(date, format = "%d %b %y")) %>%
+#   mutate(date = format(date, "%Y-%m-01")) %>%
+#   mutate(date = as.Date(date)) %>%
+#   left_join(fred_request_data("GBRCPICORMINMEI"), by = "date") %>%
+#   arrange(date)
+# 
+# uk_retail_deposits$value[490] = 122 
+# 
+# uk_retail_deposits = uk_retail_deposits %>%
+#   mutate(real_deposits = deposits / value)
+# 
+# uk_retail_deposits_plot = plot_ly(uk_retail_deposits, x = ~date, y = ~real_deposits, type = "scatter", mode = "lines") %>%
+#   layout(title = "real m4",
+#          yaxis = list(type = "log"))
+# 
+# uk_retail_deposits_plot
+# 
+# uk_retail_deposits_growth_plot = uk_retail_deposits %>%
+#   create_growth_data_for_df(., .$real_deposits) %>%
+#   create_plotly_plot_with_growth_data(.)
+# 
+# uk_retail_deposits_growth_plot
+# 
+# 
+# 
 
-personal_witholding = fred_request_data("W988RC1Q027SBEA") %>%
-  left_join(fred_request_data("W279RC1Q027SBEA"), by = "date") %>%
-  mutate(net_investment = value.x - value.y) %>%
-  left_join(fred_request_data("W986RC1Q027SBEA"), by = "date") %>%
-  mutate(witholding = value - net_investment) %>%
-  select(date, witholding) %>%
-  mutate(value = witholding / 4) %>%
-  mutate(cum_value = 60 + cumsum(value)) %>%
-  select(date, cum_value ) %>%
-  left_join(fred_request_data("CPIAUCSL"), by = "date") %>%
-  mutate(real_witholding = cum_value / value) %>%
-  create_growth_data_for_df(., .$real_witholding)
-
-plot = plot_ly(personal_witholding, x = ~date, y = ~real_witholding, type = "scatter", mode = "lines") %>%
-  layout(yaxis = list(type = "log"))
-plot
-
-plot1 = create_plotly_plot_with_growth_data(personal_witholding)
-plot1
 
 
 
-
-
-
-data = read.csv("/Users/nguyenthanhminh/Downloads/ESMS_SeasonallyAdjusted_Diffusion.csv") %>%
-  mutate(date = as.Date(surveyDate)) %>%
-  mutate(chng = NOCDISA - lag(NOCDISA, 1))
-
-plot_ly(data, x=~date, y=~chng, mode = "lines")
-
-
-
-
-uk_m4 = read.csv("/Users/nguyenthanhminh/Downloads/BOE_m4.csv")
-colnames(uk_m4) = c("date","m4","m4_lending")
-
-uk_m4 = uk_m4 %>%
-  mutate(date = as.Date(date, format = "%d %b %y")) %>%
-  mutate(date = format(date, "%Y-%m-01")) %>%
-  mutate(date = as.Date(date)) %>%
-  left_join(fred_request_data("GBRCPICORMINMEI"), by = "date") %>%
-  arrange(date)
-  
-uk_m4$value[165] = 122 
-
-
-uk_m4 = uk_m4 %>%
-  mutate(real_m4 = m4 / value,
-  real_m4_lending = m4_lending / value)
-
-plot = plot_ly(uk_m4, x = ~date, y = ~real_m4, type = "scatter", mode = "lines") %>%
-  layout(title = "real m4",
-         yaxis = list(type = "log"))
-
-plot
-
-m4_plot = uk_m4 %>%
-  create_growth_data_for_df(., .$real_m4) %>%
-  create_plotly_plot_with_growth_data(.)
-
-m4_plot
-
-
-plot1.1 = plot_ly(uk_m4, x = ~date, y = ~real_m4_lending, type = "scatter", mode = "lines") %>%
-  layout(title = "real m4 lending")
-
-plot1.1

@@ -78,7 +78,7 @@ monetaryUI <- function(id)
              ),
              fluidRow(
                tabBox(
-                 id = "2y_less)growth",
+                 id = "2y_less_growth",
                  tabPanel("Tab1", plotlyOutput(ns("bond_2y_yield_less_growth_plot1.1"))),
                  tabPanel("Tab2", plotlyOutput(ns("bond_2y_yield_less_growth_plot1.2"))),
                )

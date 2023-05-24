@@ -4,11 +4,13 @@ fredr_set_key("e86c15cf4098a7176f6edd1f9ef45600")
 library(dplyr)
 library(lubridate)
 
-data_folder_path = "data/Fred"
+
 
 load_data_from_fred <- function(key, series_id, start_date, end_date, freq, agg)
 {
   print(series_id)
+  
+  data_folder_path = "data/Fred"
   
   data = fredr(
     series_id = series_id,

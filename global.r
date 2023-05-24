@@ -2,6 +2,8 @@ library(shiny)
 library(shinydashboard)
 library(plotly)
 
+
+
 source("serverModules/fedSurveysServer.R")
 source("UIModules/fedSurveysUI.R")
 
@@ -19,3 +21,13 @@ source("UIModules/housingUI.R")
 
 source("serverModules/inflationServer.R")
 source("UIModules/inflationUI.R")
+
+# UK ####
+source("UK/dataRetrievers/boeData.R")
+source("UK/dataRetrievers/onsData.R")
+
+source("UK/serverModules/monetary/UKMonetaryServer.R")
+source("UK/UIModules/monetary/UKMonetaryUI.R")
+
+
+

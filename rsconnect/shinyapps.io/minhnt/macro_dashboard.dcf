@@ -5,9 +5,9 @@ account: minhnt
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8840610
-bundleId: 7084295
+bundleId: 7257245
 url: https://minhnt.shinyapps.io/macro_dashboard/
-when: 1681387075.49277
-lastSyncTime: 1681387075.49278
+when: 1684929772.69327
+lastSyncTime: 1684929772.69328
 asMultiple: FALSE
 asStatic: FALSE
